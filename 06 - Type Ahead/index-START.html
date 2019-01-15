@@ -15,7 +15,38 @@
     </ul>
   </form>
 <script>
+
+const xhr = new XMLHttpRequest();
 const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+let data = null;
+
+xhr.open('GET', endpoint, true);
+
+// xhr.onreadystatechange = function() {
+//   console.log(this);
+//   if (this.readyState === 4 && this.status === 200) {
+//     let myArr = JSON.parse(this.responseText);
+//     console.log(myArr);
+//   }
+// };
+
+xhr.onload = function() {
+  data = JSON.parse(this.responseText);
+  data.forEach((city) => {
+    let node = document.createElement("LI");                 // Create a <li> node
+    let textnode = document.createTextNode(`${city.city}, ${city.state}, ${city.population}`);         // Create a text node
+    node.appendChild(textnode);                              // Append the text to <li>
+    document.getElementsByClassName('suggestions')[0].appendChild(node);
+  });
+}
+
+xhr.send();
+
+const input = document.getElementsByClassName('search')[0];
+
+input.addEventListener('keyup', () => {
+  console.log(input.value);
+});
 
 </script>
   </body>
