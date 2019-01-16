@@ -16,37 +16,56 @@
   </form>
 <script>
 
-const xhr = new XMLHttpRequest();
-const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
-let data = null;
+  const Typeahead = function(endpoint) {
+    this.endpoint = endpoint;
+    this.data = null;
+    this.getData();
+  }
 
-xhr.open('GET', endpoint, true);
+  Typeahead.prototype.getData = function() {
+    const self = this;
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', this.endpoint, true);
 
-// xhr.onreadystatechange = function() {
-//   console.log(this);
-//   if (this.readyState === 4 && this.status === 200) {
-//     let myArr = JSON.parse(this.responseText);
-//     console.log(myArr);
-//   }
-// };
+    // xhr.onreadystatechange = function() {
+    //   console.log(this);
+    //   if (this.readyState === 4 && this.status === 200) {
+    //     let myArr = JSON.parse(this.responseText);
+    //     console.log(myArr);
+    //   }
+    // };
 
-xhr.onload = function() {
-  data = JSON.parse(this.responseText);
-  data.forEach((city) => {
-    let node = document.createElement("LI");                 // Create a <li> node
-    let textnode = document.createTextNode(`${city.city}, ${city.state}, ${city.population}`);         // Create a text node
-    node.appendChild(textnode);                              // Append the text to <li>
-    document.getElementsByClassName('suggestions')[0].appendChild(node);
-  });
-}
+    xhr.onload = function() {
+      self.data = JSON.parse(this.responseText);
+    }
 
-xhr.send();
+    xhr.send();
+  }
 
-const input = document.getElementsByClassName('search')[0];
+  Typeahead.prototype.appendData = function() {
+    const suggestions = document.getElementsByClassName('suggestions')[0];
+    suggestions.innerHTML = '';
+    const word = document.getElementsByClassName('search')[0].value;
+    const regex = RegExp(word, 'gi');
+    if (!word) {
+      return;
+    }
+    this.data.forEach((city) => {
+      if (regex.test(city.city) || regex.test(city.state)) {
+        let node = document.createElement("LI");
+        let textnode = document.createTextNode(`${city.city}, ${city.state}, ${city.population}`);
+        node.appendChild(textnode);
+        suggestions.appendChild(node);
+      }
+    });
+  }
 
-input.addEventListener('keyup', () => {
-  console.log(input.value);
-});
+  const input = document.getElementsByClassName('search')[0];
+  const cityTypeahead = new Typeahead('https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json');
+
+  cityTypeahead.appendData.bind(cityTypeahead);
+
+  input.addEventListener('keyup', cityTypeahead.appendData.bind(cityTypeahead));
 
 </script>
   </body>
